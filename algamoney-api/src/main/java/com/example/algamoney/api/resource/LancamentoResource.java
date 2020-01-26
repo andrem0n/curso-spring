@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
 
 import com.example.algamoney.api.event.RecursoCriadoEvent;
 import com.example.algamoney.api.exceptionhandler.AlgamoneyExceptionHandler.Erro;
@@ -48,13 +49,13 @@ public class LancamentoResource {
 	private ApplicationEventPublisher publisher;
 	
 	@GetMapping
-	public List<Lancamento> pesquisar(LancamentoFilter filter) {
-		return lancamentoRepository.filtrar(filter);
+	public Page<Lancamento> pesquisar(LancamentoFilter filter, Pageable pageable) {
+		return lancamentoRepository.filtrar(filter, pageable);
 	}
 	
 	@GetMapping("/{codigo}")
 	public ResponseEntity<Lancamento> buscarPeloCodigo(@PathVariable Long codigo) {
-		Lancamento lancamento = lancamentoRepository.findOne(codigo);
+		Lancamento lancamento = lancamentoRepository.findById(codigo).get();
 		return lancamento != null ? ResponseEntity.ok(lancamento) : ResponseEntity.notFound().build();
 	}
 	
@@ -68,7 +69,7 @@ public class LancamentoResource {
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{codigo}")
 	public void excluir(@PathVariable Long codigo) {
-		lancamentoRepository.delete(codigo);
+		lancamentoRepository.deleteById(codigo);
 	}
 	
 	
